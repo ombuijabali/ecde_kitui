@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitui ECDE Geo-Portal</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="Leaflet.Coordinates-0.1.5.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="kitui.png">
+    <link rel="stylesheet" href="L.Control.Layers.Tree.css" />
+    <link rel="stylesheet" href="Control.FullScreen.css" />
+    <link rel="stylesheet" href="leaflet-measure.css" />
+    <link rel="stylesheet" href="leaflet.zoomhome.css" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css" integrity="sha384-P9DABSdtEY/XDbEInD3q+PlL+BjqPCXGcF8EkhtKSfSTr/dS5PBKa9+/PMkW2xsY" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .title-section {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo img {
+            height: 40px; /* Adjust the height as needed */
+            margin-right: 10px;
+        }
+
+        .title {
+            margin: 0;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        #search-input {
+            padding: 5px;
+            margin-right: 5px;
+        }
+
+        #search-button {
+            padding: 5px;
+            background-color: #2ecc71;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        #inputID {
+            padding: 5px;
+            margin-right: 5px;
+        }
+
+        #find-button {
+            padding: 5px;
+            background-color: #e74c3c;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .title-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-input-wrapper {
+                margin-top: 10px;
+            }
+        }
+
+        .bg-primary-custom {
+            background-color: #3498db !important;
+        }
+        /* Custom CSS for Popup Styling */
+        .popup-container {
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            padding: 10px;
+            width: 300px;
+            text-align: left;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+
+        .popup-content {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .popup-button {
+            display: block;
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .popup-button:hover {
+                background-color: #2980b9;
+            }
+
+
+        /* Add a fixed height to the sidebar */
+        .sidebar {
+            height: calc(100vh - 100px); /* Adjust the height as needed */
+            overflow-y: auto; /* Add a scrollbar when the content overflows */
+        }
+
+        /* Style each list item */
+        #school-list li {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+            #school-list li:hover {
+                background-color: #f0f0f0;
+            }
+
+            /* Style the school name and ward container */
+            #school-list li div.label-container {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 5px;
+                height: 2em;
+            }
+
+                /* Style the label (school name) */
+                #school-list li div.label-container strong {
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-bottom: 5px;
+                }
+
+                /* Style the distance */
+                #school-list li div.label-container span.distance-info {
+                    font-size: 14px;
+                    color: #555;
+                }
+
+            /* Style the directions icon */
+            #school-list li i.direction-icon {
+                font-size: 18px;
+                color: #27ae60;
+                align-self: flex-end;
+                margin-top: auto;
+            }
+
+            /* Add this CSS to your HTML or a separate style sheet */
+            .leaflet-popup-content-wrapper {
+                background: #fff; /* Background color */
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16); /* Box shadow */
+            }
+
+            .leaflet-popup-content {
+                font-family: 'Arial', sans-serif; /* Font family */
+                font-size: 14px; /* Font size */
+                line-height: 1.8; /* Line height */
+                color: #333; /* Text color */
+            }
+
+            .leaflet-popup-content table {
+                width: 100%; /* Make the table fill the popup content */
+                border-collapse: collapse; /* Collapse table borders */
+            }
+
+            .leaflet-popup-content th,
+            .leaflet-popup-content td {
+                padding: 8px; /* Padding for table cells */
+                border: 1px solid #ddd; /* Border color */
+            }
+
+            .leaflet-popup-content th {
+                background-color: #f2f2f2; /* Header background color */
+            }
+
+            .leaflet-popup-content h3 {
+                margin-top: 0; /* Remove default margin for h3 */
+                color: #007bff; /* Title color */
+            }
+
+            .leaflet-popup-tip-container {
+                display: none; /* Hide the default arrow tip */
+            }
+
+            /* Custom close button for the popup */
+            .leaflet-popup-close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #red;
+                border: none;
+                color: #007bff; /* Close button color */
+                cursor: pointer;
+            }
+
+
+            /* Add these styles to your CSS file or in a <style> tag in your HTML */
+            #pagination-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 10px;
+              }
+
+          button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+          }
+
+          button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+          }
+
+    </style>
+</head>
+<body>
+    <div class="title-section">
+        <header>
+            <div class="container-fluid bg-primary-custom text-white p-3 d-flex align-items-center justify-content-between">
+                <div class="logo">
+                    <img src="kitui.png" alt="Kitui Logo" class="img-fluid" style="max-height: 40px;">
+                </div>
+                <h1 class="title" style="font-size:30px;"> | Kitui ECDE Schools Portal</h1>
+            </div>
+        </header>
+        <div class="search-input-wrapper">
+            <input type="text" id="search-input" placeholder="Search an ECDE School">
+            <button id="search-button"><i class="fa fa-search"></i></button>
+        </div>
+        <div>
+            <label for="inputID">Enter ECDE Name:</label>
+            <input type="text" id="inputID" />
+            <button id="find-button" onclick="filterNearestSchool()">Find the Nearest School</button>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar with School List -->
+            <div class="col-md-3">
+                <div class="sidebar">
+                    <h3 style="margin-left:90px; color: #3498db;">Quick Find</h3>
+                    <ul id="school-list"></ul>
+                    <div id="pagination-container"></div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="map" style="width: 100%; height: 850px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet-providers JavaScript for Google Satellite layer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.12.0/leaflet-providers.min.js"></script>
+    <script src="Leaflet.Coordinates-0.1.5.src.js"></script>
+    <script src="L.Control.Layers.Tree.js"></script>
+    <script src="Control.FullScreen.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.js" integrity="sha384-N2S8y7hRzXUPiepaSiUvBH1ZZ7Tc/ZfchhbPdvOE5v3aBBCIepq9l+dBJPFdo1ZJ" crossorigin="anonymous"></script>
+    <script src="leaflet-geojson-vt.js"></script>
+    <script src="spatial_join.js"></script>
+    <script src="primary.js"></script>
+    <script src="roaded.js"></script>
+    <script src="admin.js"></script>
+    <script src="services.js"></script>
+    <script src="demand.js"></script>
+    <script src="buildings.js"></script>
+    <script src="tulia.js"></script>
+    <script src="mwangya.js"></script>
+    <script src="kiamani.js"></script>   
+    <script src="Leaflet.LocationShare.js"></script>
+    <script src="leaflet.browser.print.js"></script>
+    <script src="leaflet.zoomhome.min.js"></script>
+    <script src="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.min.js"></script>
+    <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.js'></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet-pip@1.1.0/leaflet-pip.js"></script>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map', { zoomControl: false }).setView([-1.174865, 37.974195], 14);
+
+        // Adding the satellite imagery basemap
+        var satelliteLayer = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 25,
+            id: 'mapbox/satellite-v9',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1Ijoic2ltaW9uMTIzIiwiYSI6ImNsZzZkaGJtcjBjZG8zcnFpcG1icHZ0MWEifQ.qs9HmzJglua2mUBOnoahQQ'
+        })
+
+        // Adding the OSM basemap
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 25,
+        });
+
+        var EsriWorldTerrainLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+            maxZoom: 13
+        });
+
+        //OSM Building Data
+        var osmbLayer = new OSMBuildings(map).load('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
+
+
+        // Set the Mapbox basemap as the default basemap
+        osmLayer.addTo(map);
+
+        //Coordinates/ Mouse Position
+        L.control.coordinates({
+            position: "bottomright", //optional default "bottomright"
+            useDMS: true,
+            labelTemplateLat: "Latitude: {y}",
+            labelTemplateLng: "Longitude: {x}",
+            useLatLngOrder: true,
+        }).addTo(map);
+
+        //Scale Bar
+        L.control.scale().addTo(map);
+
+        var zoomHome = L.Control.zoomHome();
+        zoomHome.addTo(map);
+
+        // create a fullscreen button and add it to the map
+        L.control.fullscreen({
+            position: 'topright',
+            title: 'Show me the fullscreen !',
+            titleCancel: 'Exit fullscreen mode',
+            content: null,
+            forceSeparateButton: true,
+            fullscreenElement: false
+        }).addTo(map);
+
+        // Add the Measure Control
+        L.control.ruler({
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Define options for browser print control
+        var options = {
+            title: 'Print Map',
+            position: 'bottomleft'
+        };
+
+        // Create browser print control with options and add it to the map
+        var browserControl = L.control.browserPrint(options).addTo(map);
+
+        var options = {
+            position: 'bottomleft',
+            lengthUnit: {
+                factor: 0.539956803,    // from km to nm
+                display: 'meters',
+                decimal: 2
+            }
+        };
+
+        map.pm.addControls({
+            position: 'bottomright',
+            drawCircle: false,
+        });
+        // Create a custom icon using Font Awesome
+        var schoolIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<i class="fas fa-school fa-2x"></i>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+        });
+
+        // Create a Leaflet GeoJSON layer for the ECDE school data and use the custom icon
+        var edceLayer = L.geoJSON(ecde, {
+            pointToLayer: function (feature, latlng) {
+                // Determine the marker color based on the 'Level' attribute
+                var markerColor = 'blue';
+
+                // Create a custom icon with the selected color
+                var customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: '<i class="fas fa-school fa-2x" style="color:' + markerColor + ';"></i>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32]
+                });
+
+                return L.marker(latlng, {
+                    icon: customIcon
+                });
+            },
+            style: function (feature) {
+                // Define a color for the GeoJSON style
+                var color = 'brown';
+
+                return {
+                    color: color,
+                    weight: 5,
+                    opacity: 1,
+                    dashArray: '5, 5'
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                // Create a custom HTML content for the popup
+                var popupContent = `
+                                                                                <div class="popup-container">
+                                                                                    <ul class="nav nav-tabs" id="myTabs">
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link active" id="route-tab" data-toggle="tab" href="#ecde-content">ECDE</a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link" id="fiber-tab" data-toggle="tab" href="#level-content">Level</a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link" id="operator-tab" data-toggle="tab" href="#operator-content">Infrastacture</a>
+                                                                                        </li>
+                                                                                    </ul>
+
+                                                                                    <div class="tab-content">
+                                                                                        <div class="tab-pane fade show active" id="ecde-content">
+                                                                                            <p class="popup-title">ECDE Information</p>
+                                                                                            <p class="popup-content"><strong>ECDE Name:</strong> ${feature.properties.SCHOOL_NAM}</p>
+                                                                                            <p class="popup-content"><strong>County:</strong> ${feature.properties.County}</p>
+                                                                                            <p class="popup-content"><strong>District:</strong> ${feature.properties.DISTRICT}</p>
+                                                                                            <p class="popup-content"><strong>Sub County:</strong> ${feature.properties.SUB_COUNTY}</p>
+                                                                                            <p class="popup-content"><strong>Ward:</strong> ${feature.properties.Ward}</p>
+                                                                                            <p class="popup-content"><strong>Nearest ECDE:</strong> ${feature.properties.TargetID}</p>
+                                                                                            <p class="popup-content"><strong>Distance (Meters):</strong> ${feature.properties.Distance}</p>
+                                                                                            <!-- Add more route attributes here -->
+                                                                                        </div>
+                                                                                        <div class="tab-pane fade" id="level-content">
+                                                                                            <p class="popup-title">Level Information</p>
+                                                                                            <p class="popup-content"><strong>ECDE Level:</strong> ${feature.properties.Level_1}</p>
+                                                                                            <p class="popup-content"><strong>Status:</strong> ${feature.properties.Status}</p>
+                                                                                            <p class="popup-content"><strong>Students Capacity:</strong> ${feature.properties.CAPACITY_O}</p>
+                                                                                            <!-- Add more fiber attributes here -->
+                                                                                        </div>
+                                                                                        <div class="tab-pane fade" id="operator-content">
+                                                                                            <p class="popup-title">Infrastacture Information</p>
+                                                                                            <p class="popup-content"><strong>Infrastacture:</strong> ${feature.properties.INFRASTRUC}</p>
+                                                                                            <p class="popup-content"><strong>Remarks:</strong> ${feature.properties.Comments}</p>
+                                                                                            <p class="popup-content"><strong>Coordinates:</strong>  (${feature.properties.X_Coord}, ${feature.properties.Y_Coord})</p>
+                                                                                            <!-- Add more operator attributes here -->
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            `;
+
+                layer.bindPopup(popupContent);
+            }
+        }).addTo(map);
+        
+
+        // Define variables for input and target schools
+        var inputSchool = null;
+        var targetSchool = null;
+
+        // Enable searching when pressing Enter
+        document.getElementById('inputID').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                filterNearestSchool();
+            }
+        });
+  
+        // Define a function to filter and display the nearest school
+        function filterNearestSchool() {
+            var targetInputID = document.getElementById('inputID').value;
+
+            // Clear the map of any previous markers, lines, and popups
+            if (inputSchool) {
+                map.removeLayer(inputSchool.marker);
+                inputSchool = null;
+            }
+            if (targetSchool) {
+                map.removeLayer(targetSchool.marker);
+                map.removeLayer(targetSchool.line);
+                map.closePopup();
+                targetSchool = null;
+            }
+
+            var targetFound = false;
+
+            // Find the input school based on the inputID
+            edceLayer.eachLayer(function (layer) {
+                var inputID = layer.feature.properties.InputID;
+                var targetID = layer.feature.properties.TargetID;
+                var distance = layer.feature.properties.Distance;
+                var schoolName = layer.feature.properties.SCHOOL_NAM;
+
+                // Check if the current feature matches the target InputID
+                if (schoolName === targetInputID) {
+                    // Create a blue flag icon for the input school
+                    createSchoolMarker(layer, 'blue', 'Searched School');
+
+                    // Use the school name to find the target value
+                    edceLayer.eachLayer(function (targetLayer) {
+                        if (targetLayer.feature.properties.SCHOOL_NAM === targetID) {
+                            // Create a red flag icon for the target school
+                            createSchoolMarker(targetLayer, 'red', 'Nearest ECDE School');
+
+                            // Get the road feature based on the distance
+                            var roadFeature = getRoadByDistance(distance);
+
+                            if (roadFeature) {
+                               
+                                targetFound = true;
+
+                                // Highlight the road on the map
+                                highlightRoad(roadFeature);
+                            }
+                        }
+                    });
+                }
+            });
+
+            if (!targetFound) {
+                // Display a "Not Found" message
+                alert("ECDE School with School Name '" + targetInputID + "' not found.");
+            }
+        }
+
+        // Function to get road feature by distance
+        function getRoadByDistance(distance) {
+            var targetRoad = null;
+
+            // Iterate through the roadsLayer to find the road based on distance
+            roadsLayer.eachLayer(function (layer) {
+                var totalLength = layer.feature.properties.Total_Leng;
+
+                // Assuming distance is less than or equal to the total length of the road
+                if (distance <= totalLength) {
+                    targetRoad = layer.feature;
+                }
+            });
+
+            return targetRoad;
+        }
+
+        // Function to highlight road on the map
+        var highlightedRoadLayerGroup = L.layerGroup().addTo(map);
+
+        function highlightRoad(targetLayer) {
+          // Clear the previously highlighted road layer
+          highlightedRoadLayerGroup.clearLayers();
+
+          // Check if targetLayer is defined and has a feature property
+          if (targetLayer && targetLayer.feature) {
+            // Get the OBJECTID_1 from the clicked feature in the ECDE layer
+            var targetObjectID = targetLayer.feature.properties.OBJECTID_1;
+
+            // Iterate through the roadsLayer to find the road based on OBJECTID_1
+            roadsLayer.eachLayer(function (roadLayer) {
+              if (roadLayer.feature && roadLayer.feature.properties) {
+                var roadLayerObjectID = roadLayer.feature.properties.OBJECTID_1;
+
+                // Check if the OBJECTID_1 matches the targetObjectID
+                if (roadLayerObjectID === targetObjectID) {
+                  // Highlight the road by adding it to the layer group
+                  roadLayer.setStyle({
+                    color: 'blue', // Change the color to blue (or any other highlight color)
+                    weight: 6
+                  });
+                  highlightedRoadLayerGroup.addLayer(roadLayer);
+
+                  // Do something here if needed
+                }
+              }
+            });
+          }
+        }
+
+        // Add a click event to the ECDE layer to handle highlighting the road
+        edceLayer.on('click', function (event) {
+            highlightRoad(event.layer);
+        });
+
+        // Function to create a school marker
+        function createSchoolMarker(layer, color, label) {
+            var schoolIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="color: ${color}; font-weight: bold;" class="custom-icon"><i class="fas fa-flag"></i> ${label}</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [30, 32]
+            });
+
+            var school = {
+                latlng: [layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]],
+                distance: layer.feature.properties.Distance,
+                marker: L.marker([layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]], {
+                    icon: schoolIcon
+                }).addTo(map)
+            };
+
+            // Customize the popup for the school marker
+            var popupContent = '<div style="text-align: center;">' +
+                `<strong>Distance:</strong> ${school.distance.toFixed(2)} meters` +
+                '</div>';
+
+            school.marker.bindPopup(popupContent, {
+                maxWidth: 200, // Maximum width of the popup
+                closeButton: false, // Remove the close button
+            });
+
+            if (label === 'Searched School') {
+                inputSchool = school;
+            } else {
+                targetSchool = school;
+            }
+        }
+
+         var roadsLayer = L.geoJSON(roads, {
+            style: {
+                color: 'brown',
+                weight: 4,
+                opacity: 0.7
+            },
+            onEachFeature: function(feature, layer) {
+                layer.on('click', function(e) {
+                    highlightRoad(e.target);
+                    displayPopup(feature);
+                });
+
+                // Bind a popup to each feature
+                var popupContent = "<b>Road Name:</b> " + feature.properties.Name + "<br>" +
+                                   "<b>Length (Meters):</b> " + feature.properties.Total_Leng.toFixed(2) + "<br>" +
+                                   "<b>Road Type:</b> " + feature.properties.Type;
+                layer.bindPopup(popupContent);
+            }
+        });
+
+        function highlightRoad(layer) {
+            // Reset styles for all roads
+            roadsLayer.resetStyle();
+
+            // Highlight the clicked road
+            layer.setStyle({
+                color: 'blue',  // Change the color to red (or any other highlight color)
+                weight: 6
+            });
+        }
+
+        function displayPopup(feature) {
+            // You can customize the popup content and styling here
+            var popupContent = "<b>Name:</b> " + feature.properties.Name + "<br>" +
+                               "<b>Length:</b> " + feature.properties.Total_Leng + "<br>" +
+                               "<b>Type:</b> " + feature.properties.Type;
+
+            L.popup()
+                .setLatLng(roadsLayer.getBounds().getCenter())  // Popup at the center of the map
+                .setContent(popupContent)
+                .openOn(map);
+        }
+
+        // Add the road layer to the map
+        roadsLayer.addTo(map);
+
+        // Create a custom icon using Font Awesome
+        var schoolIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<i class="fas fa-school fa-2x"></i>', // Use the Font Awesome school icon
+            iconSize: [32, 32], // Set the icon size (adjust as needed)
+            iconAnchor: [16, 32] // Set the anchor point (adjust as needed)
+        });
+
+        // Create a Leaflet GeoJSON layer for the school data and use the custom icon
+        var primaryLayer = L.geoJSON(primary, {
+            pointToLayer: function (feature, latlng) {
+                // Use the custom school icon for each school point
+                return L.marker(latlng, {
+                    icon: schoolIcon
+                });
+            },
+            style: {
+                color: 'black',
+                weight: 3,
+                opacity: 1
+            }
+        });          
+
+        var adminLayer = L.geoJSON(admin, {
+            style: {
+                color: 'black',
+                weight: 1,
+                opacity: 0.4
+            }
+        });       
+
+        var demandLayer = L.geoJSON(demand, {
+            style: {
+                color: 'grey',
+                weight: 1,
+                opacity: 0.4
+            }
+        });
+        // Create a custom icon using Font Awesome for households
+        var houseIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<i class="fas fa-home fa-2x"></i>', // Use the Font Awesome home icon
+            iconSize: [5, 5], // Set the icon size (adjust as needed)
+            iconAnchor: [10, 10] // Set the anchor point (adjust as needed)
+        });
+
+        var minScale = 17;
+        var maxScale = 22;
+
+        var buildingsLayer = L.geoJSON(building, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: houseIcon
+                });
+            },
+            style: {
+                color: 'red',
+                weight: 1,
+                opacity: 0.4
+            }
+        });
+
+        // Add the buildings layer to the map
+ 
+
+        // Listen for zoomend event to update visibility based on scale
+        map.on('zoomend', function() {
+            var currentZoom = map.getZoom();
+
+            // Check if the current zoom is within the specified range
+            if (currentZoom >= minScale && currentZoom <= maxScale) {
+                buildingsLayer.addTo(map); // Show the layer
+            } else {
+                map.removeLayer(buildingsLayer); // Hide the layer
+            }
+        });
+
+        // Popup content template
+        function getPopupContent(properties) {
+            var title = getTitleBasedOnToBreak(properties.ToBreak);
+            return `
+                <h3>${title}</h3>
+                <b>Population:</b> ${properties.Population}<br>
+                <b>Households:</b> ${properties.Households}<br>
+                <b>Average Households:</b> ${properties.Avg_HH}
+            `;
+        }
+
+        // Function to determine title based on 'ToBreak' value
+        function getTitleBasedOnToBreak(value) {
+            // Define titles based on the 'ToBreak' values
+            var titles = [
+                'Well Serviced',
+                'Moderately Serviced',
+                'Poorly Serviced'
+            ];
+
+            // Interpolate title based on value
+            var interpolationFactor = value / 2000; // Assuming 2000 is the max value
+            var titleIndex;
+
+            // Choose the title based on the interpolation factor
+            if (interpolationFactor < 0.33) {
+                titleIndex = 0; // Well Serviced
+            } else if (interpolationFactor < 0.66) {
+                titleIndex = 1; // Moderately Serviced
+            } else {
+                titleIndex = 2; // Poorly Serviced
+            }
+
+            return titles[titleIndex];
+        }
+
+        // Assuming 'service' is your GeoJSON data
+        var serviceLayer = L.geoJSON(service, {
+            style: function (feature) {
+                var toBreakValue = feature.properties.ToBreak;
+                var color = getColorBasedOnToBreak(toBreakValue, 'service');
+
+                return {
+                    fillColor: color,
+                    weight: 2,
+                    opacity: 1
+                };
+            }
+        }).bindPopup(function (layer) {
+            return getPopupContent(layer.feature.properties);
+        });
+
+        // Add the service layer to the map
+        serviceLayer.addTo(map);
+
+
+        // Function to determine color based on 'ToBreak' value using a color ramp
+        function getColorBasedOnToBreak(value, layer) {
+            // Define color ramp breakpoints and corresponding colors for each layer
+            var colorRamps = {
+                service: {
+                    breakpoints: [500, 1000, 2000],
+                    colors: ['#CCCCFF', '#5D3FD3', '#0047AB']
+                },
+                tulia: {
+                    breakpoints: [500, 1000, 2000],
+                    colors: ['#000000', '#FEB24C', '#F03B20']
+                },
+                kiamani: {
+                    breakpoints: [500, 1000, 2000],
+                    colors: ['#000000', '#FFA500', '#FF4500']
+                },
+                mwangya: {
+                    breakpoints: [500, 1000, 2000],
+                    colors: ['#9ECAE1', '#3182BD', '#08519C']
+                }
+            };
+
+            // Check if the layer exists in colorRamps
+            if (colorRamps[layer]) {
+                var breakpoints = colorRamps[layer].breakpoints;
+                var colors = colorRamps[layer].colors;
+
+                // Find the appropriate color based on the value
+                for (var i = 0; i < breakpoints.length; i++) {
+                    if (value <= breakpoints[i]) {
+                        return colors[i];
+                    }
+                }
+
+                // Default color if value exceeds all breakpoints
+                return colors[colors.length - 1];
+            } else {
+                // Default color if layer is not found
+                return '#000000'; // Change this to the desired default color
+            }
+        }
+
+        // Create layers with dynamic color based on 'ToBreak' field
+        var tuliaLayer = L.geoJSON(tulia, {
+            style: function (feature) {
+                var toBreakValue = feature.properties.ToBreak;
+                return {
+                    color: getColorBasedOnToBreak(toBreakValue, 'tulia'),
+                    weight: 1.5,
+                    opacity: 1
+                };
+            }
+        }).bindPopup(function (layer) {
+            return getPopupContent(layer.feature.properties);
+        });
+
+        var kiamaniLayer = L.geoJSON(kiamani, {
+            style: function (feature) {
+                var toBreakValue = feature.properties.ToBreak;
+                return {
+                    color: getColorBasedOnToBreak(toBreakValue, 'kiamani'),
+                    weight: 1.5,
+                    opacity: 1
+                };
+            }
+        }).bindPopup(function (layer) {
+            return getPopupContent(layer.feature.properties);
+        });
+
+        var mwangyaLayer = L.geoJSON(mwangya, {
+            style: function (feature) {
+                var toBreakValue = feature.properties.ToBreak;
+                return {
+                    color: getColorBasedOnToBreak(toBreakValue, 'mwangya'),
+                    weight: 1.5,
+                    opacity: 1
+                };
+            }
+        }).bindPopup(function (layer) {
+            return getPopupContent(layer.feature.properties);
+
+        });
+
+        // Create groups for organizing the layers
+        var groupedOverlays = {
+            "Basemaps": {
+                "Satellite": satelliteLayer,
+                "OpenStreetMap": osmLayer,
+                "Esri_World_Terrain": EsriWorldTerrainLayer,
+                "OSM_3D_Buildings": osmbLayer
+            },
+            "Roads": {
+                "Roads": roadsLayer
+            },
+            "edce": {
+                "EDCEs": edceLayer,
+                "Primary": primaryLayer
+            },
+            "admin": {
+                "admin": adminLayer
+            },
+            "service": {
+                "service": serviceLayer,
+                "tulia": tuliaLayer,
+                "kiamani": kiamaniLayer,
+                "mwangya": mwangyaLayer
+
+            },
+            "demand": {
+                "demand": demandLayer
+            },
+            "buildings": {
+                "buildings": buildingsLayer
+            }
+        };
+
+        // Create the updated overlaysTree hierarchy
+        var overlaysTree = {
+            label: 'Base Layers',
+            selectAllCheckbox: 'Un/select all',
+            children: [
+                {
+                    label: 'Basemaps',
+                    selectAllCheckbox: 'Un/select all',
+                    collapsed: true,
+                    children: [
+                        {
+                            label: 'Google Satellite',
+                            layer: groupedOverlays.Basemaps.Satellite,
+                        }, {
+                            label: 'OpenStreetMap',
+                            layer: groupedOverlays.Basemaps.OpenStreetMap,
+                        }, {
+                            label: 'Esri World Terrain',
+                            layer: groupedOverlays.Basemaps.Esri_World_Terrain
+                        }, {
+                            label: 'OSM 3D Buildings',
+                            layer: groupedOverlays.Basemaps.OSM_3D_Buildings,
+                            checked: true // Add this line to make the checkbox checked by default
+                        }
+                    ]
+                },
+                {
+                    "EDCEs": edceLayer,
+                    label: 'EDCEs',
+                    selectAllCheckbox: 'Un/select all',
+                    collapsed: true,
+                    children: [
+                        {
+                            label: 'ECDE Schools',
+                            layer: edceLayer
+                        },
+                        {
+                            label: 'Primary Schools',
+                            layer: primaryLayer 
+                        }
+                    ]
+                },
+                {
+                    label: 'Roads',
+                    layer: roadsLayer,
+                    checked: true,
+                },               
+                 {                   
+                    label: 'Kitui West Service Area(s)',
+                    selectAllCheckbox: 'Un/select all',
+                    //collapsed: true,
+                    children: [
+                        {
+                            label: 'Service Area',
+                            layer: serviceLayer
+                        },
+                        {
+                            label: 'Tulia Region',
+                            layer: tuliaLayer
+                        },                        
+                        {
+                            label: 'Mwangya Region',
+                            layer: mwangyaLayer
+                        },
+                        {
+                            label: 'Kiamani Region',
+                            layer: kiamaniLayer 
+                        }
+                    ]
+                },
+                {
+                    label: 'Households',
+                    layer: buildingsLayer,
+                    checked: true,
+                },
+                {
+                    label: 'Demand Lines',
+                    layer: demandLayer,
+                    checked: true,
+                },
+                {
+                    label: 'Mutonguni Ward',
+                    layer: adminLayer,
+                    checked: true,
+                }             
+            ]
+        };
+
+
+        // Create a control layer with the tree structure for overlays
+        var treeControl = L.control.layers.tree(null, overlaysTree, {
+            collapsed: false, // Set to true to initially collapse the tree
+        }).addTo(map);
+
+        roadsLayer.addTo(map);
+        serviceLayer.addTo(map);
+
+        // Function to highlight a school on the map
+        function highlightSchoolOnMap(schoolLayer) {
+            // Your code to highlight the school on the map
+            // For example, you can zoom to the school's location
+            map.setView(schoolLayer.getLatLng(), 15);
+        }
+
+        // Function to display school information in the info window
+        function displaySchoolInfo(schoolLayer) {
+            // Your code to display school information
+            // For example, you can open a popup with the school's details
+            schoolLayer.openPopup();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const uniqueSchoolNames = [];
+
+            // Function to update the sidebar list based on the current page
+            function updateSidebarList(allSchools, sidebarList, schoolsPerPage, currentPage) {
+                sidebarList.innerHTML = '';
+
+                // Calculate the start and end indices for the current page
+                const startIndex = (currentPage - 1) * schoolsPerPage;
+                const endIndex = startIndex + schoolsPerPage;
+
+                // Iterate through the schools for the current page
+                for (let i = startIndex; i < endIndex && i < allSchools.length; i++) {
+                    const schoolName = allSchools[i];
+                    const school = findSchoolByName(schoolName);
+
+                    const listItem = document.createElement('li');
+                    listItem.style.display = 'flex';
+                    listItem.style.flexDirection = 'column';  // Arrange items in a column
+
+                    // Increase the height of the school name and make it occupy the full width
+                    const schoolNameSpan = document.createElement('div');
+                    schoolNameSpan.textContent = schoolName;
+                    schoolNameSpan.classList.add('label-container');  // Add a class for styling
+                    schoolNameSpan.style.textDecoration = 'none';  // Remove default underline
+                    schoolNameSpan.style.fontSize = '14px';  // Reduce the font size
+                    schoolNameSpan.addEventListener('mouseover', () => {
+                        schoolNameSpan.style.textDecoration = 'underline';  // Add underline on hover
+                    });
+                    schoolNameSpan.addEventListener('mouseout', () => {
+                        schoolNameSpan.style.textDecoration = 'none';  // Remove underline when not hovered
+                    });
+                    listItem.appendChild(schoolNameSpan);
+
+                    // Create a div to contain ward name and directions
+                    const infoContainer = document.createElement('div');
+                    infoContainer.style.display = 'flex';
+                    infoContainer.style.justifyContent = 'space-between';  // Put ward and directions at opposite ends
+
+                    // Add a span element to display the ward name in lowercase
+                    const wardNameSpan = document.createElement('span');
+                    wardNameSpan.textContent = school.feature.properties.Ward.toLowerCase();
+                    infoContainer.appendChild(wardNameSpan);
+
+                    // Add an icon element to display the Font Awesome directions icon
+                    const directionsIcon = document.createElement('i');
+                    directionsIcon.classList.add('fas', 'fa-directions', 'direction-icon');
+                    infoContainer.appendChild(directionsIcon);
+
+                    // Append the info container to the list item
+                    listItem.appendChild(infoContainer);
+
+                    // Add a click event listener to the list item
+                    listItem.addEventListener('click', function () {
+                        highlightSchoolOnMap(school);
+                        displaySchoolInfo(school);
+                    });
+
+                    sidebarList.appendChild(listItem);
+                }
+            }
+
+            // Function to find a school by its name
+            function findSchoolByName(schoolName) {
+                let foundSchool = null;
+                edceLayer.eachLayer((school) => {
+                    if (school.feature.properties.SCHOOL_NAM === schoolName) {
+                        foundSchool = school;
+                    }
+                });
+                return foundSchool;
+            }
+
+            // Function to find a school layer by its name
+            function findSchoolLayerByName(schoolName) {
+                let foundLayer = null;
+                edceLayer.eachLayer((schoolLayer) => {
+                    if (schoolLayer.feature.properties.SCHOOL_NAM === schoolName) {
+                        foundLayer = schoolLayer;
+                    }
+                });
+                return foundLayer;
+            }
+
+            // Function to display pagination controls
+            function displayPaginationControls(totalPages, currentPage) {
+                const paginationContainer = document.getElementById('pagination-container');
+                paginationContainer.innerHTML = ''; // Clear previous controls
+
+                // Create "Previous" button
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.disabled = currentPage === 1; // Disable if on the first page
+                prevButton.addEventListener('click', function () {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updateSidebarList(allSchools, sidebarList, schoolsPerPage, currentPage);
+                        displayPaginationControls(totalPages, currentPage);
+                    }
+                });
+
+                paginationContainer.appendChild(prevButton);
+
+                // Create page number buttons
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.disabled = i === currentPage; // Disable the current page button
+                    pageButton.addEventListener('click', function () {
+                        currentPage = i;
+                        updateSidebarList(allSchools, sidebarList, schoolsPerPage, currentPage);
+                        displayPaginationControls(totalPages, currentPage);
+                    });
+
+                    paginationContainer.appendChild(pageButton);
+                }
+
+                // Create "Next" button
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.disabled = currentPage === totalPages; // Disable if on the last page
+                nextButton.addEventListener('click', function () {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updateSidebarList(allSchools, sidebarList, schoolsPerPage, currentPage);
+                        displayPaginationControls(totalPages, currentPage);
+                    }
+                });
+
+                paginationContainer.appendChild(nextButton);
+            }
+            // Set the number of schools to display per page
+            const schoolsPerPage = 10;
+
+            // Get the user's location dynamically
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const userLocation = new L.LatLng(position.coords.latitude, position.coords.longitude);
+
+                // Populate the sidebar with the list of schools
+                const sidebarList = document.getElementById('school-list');
+                sidebarList.innerHTML = '';
+
+                // Iterate through each school and add it to the sidebar
+                const allSchools = []; // Create an array to store all schools
+                edceLayer.eachLayer((school) => {
+                    const schoolName = school.feature.properties.SCHOOL_NAM;
+                    // Only add the school if it's not already in the array
+                    if (!allSchools.includes(schoolName)) {
+                        allSchools.push(schoolName);
+                        const listItem = document.createElement('li');
+                        listItem.textContent = schoolName;
+
+                        // Add a click event listener to highlight the school on the map and show its information
+                        listItem.addEventListener('click', function () {
+                            // Highlight the school on the map
+                            highlightSchoolOnMap(school);
+
+                            // Display school information
+                            displaySchoolInfo(school);
+                        });
+
+                        sidebarList.appendChild(listItem);
+                    }
+                });
+
+                // Calculate the total number of pages
+                const totalPages = Math.ceil(allSchools.length / schoolsPerPage);
+
+                // Set the current page
+                let currentPage = 1;
+
+                // Update the sidebar list based on the current page
+                updateSidebarList(allSchools, sidebarList, schoolsPerPage, currentPage);
+
+                // Display pagination controls
+                displayPaginationControls(totalPages, currentPage);
+            });
+
+        });
+
+    </script>
+</body>
+</html>
