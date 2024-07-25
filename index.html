@@ -16,7 +16,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.0-beta.1/mapbox-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css" integrity="sha384-P9DABSdtEY/XDbEInD3q+PlL+BjqPCXGcF8EkhtKSfSTr/dS5PBKa9+/PMkW2xsY" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gokertanrisever/leaflet-ruler@master/src/leaflet-ruler.css" crossorigin="anonymous">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -376,11 +376,6 @@
             forceSeparateButton: true,
             fullscreenElement: false
         }).addTo(map);
-
-        // Add the Measure Control
-        //L.control.ruler({
-            //position: 'bottomleft'
-        //}).addTo(map);
 
         // Define options for browser print control
         var options = {
